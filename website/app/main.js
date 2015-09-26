@@ -82,6 +82,13 @@
       this.openGearMenu();
     },
 
+    narrowInterfaceActivated: function () {
+      this.appHeader.style.marginTop = 50;
+    },
+
+    wideInterfaceActivated: function() {
+      this.appHeader.style.marginTop = 0;
+    },
 
     showSettings: function() {
       this.openGearMenu();
@@ -298,9 +305,20 @@
         return true;
       }
     };
-    if (!tryFindSettingsGear()) {
+
+    // Find app header
+    var tryFindAppHeader = function() {
+      var e = findReactDOMNode({ name: "MessengerMasterViewHeader" });
+      if (e) {
+        e = e.parentNode;
+        window.MacMessenger.appHeader = e;
+        return true;
+      }
+    };
+ 
+    if (!tryFindSettingsGear() || !tryFindAppHeader()) {
       var observer = new MutationObserver(function(mutations) {
-        if (tryFindSettingsGear()) {
+        if (tryFindSettingsGear() && tryFindAppHeader()) {
           observer.disconnect();
         }
       });
