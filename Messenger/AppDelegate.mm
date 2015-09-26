@@ -679,6 +679,16 @@ static void NetReachCallback(SCNetworkReachabilityRef target,
 }
 
 
+- (NSSize)windowWillResize:(NSWindow *)sender toSize:(NSSize)frameSize {
+  if (frameSize.width > 640) {
+    [self evaluateJavaScript:@"(typeof MacMessenger != 'undefined') && MacMessenger.wideInterfaceActivated()"];
+  } else {
+    [self evaluateJavaScript:@"(typeof MacMessenger != 'undefined') && MacMessenger.narrowInterfaceActivated()"];
+  }
+  return frameSize;
+}
+
+
 #pragma mark - NSUserNotificationCenterDelegate
 
 
