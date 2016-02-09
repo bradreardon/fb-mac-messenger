@@ -3,13 +3,13 @@
 Mac app wrapper around [Facebook's stand-alone Messenger](https://www.messenger.com/).
 
 > [Download latest release](http://fbmacmessenger.rsms.me/)<br>
-> [Download development release (for OS X 10.11)](http://fbmacmessenger.rsms.me/dist/Messenger-dev.zip)
 
 ![Screenshot](http://fbmacmessenger.rsms.me/screenshot.png)
 
 - Disclaimer: This is NOT an official Facebook product, but just a hobby project
 - Icon courtesy of Sebastiaan de With (Muir v3) <http://pictogram.agency/muir/>
 - Distribution statistics, including number of installed versions, [can be found here: https://gist.github.com/rsms/8c0da07b70a960404e3a](https://gist.github.com/rsms/8c0da07b70a960404e3a)
+- Are you running OS X 10.9? [Download version 0.1.4](http://fbmacmessenger.rsms.me/dist/Messenger-0.1.4.1440786644-f3436781b1e02ea1.zip)
 
 ## MIT license
 

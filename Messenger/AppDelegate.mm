@@ -6,10 +6,12 @@
 #import "jsapi.h"
 #import "WebPreferencesPrivate.h"
 #import "WebStorageManagerPrivate.h"
-#import "WebViewPrivate.h"
+#import "WebViewZoomController.h"
 #import "JSClass.hh"
 #import "MEmbeddedRes.h"
 #import "MMFakeDragInfo.h"
+
+extern NSString* kMainJSDataURL; // implemented in generated file MainJSDataURL.m
 
 #define USE_BLURRY_BACKGROUND 0
 
@@ -34,7 +36,20 @@ NSString* ReadDeviceID() {
   return did;
 }
 
+@interface DraggableView : NSView {}
+@property (nonatomic, weak) NSWindow* draggingWindow;
+@end
 
+@implementation DraggableView
+@synthesize draggingWindow;
+-(void)mouseDragged:(NSEvent *)theEvent {
+  NSWindow * w = self.draggingWindow;
+  CGRect frame = w.frame;
+  frame.origin.x += theEvent.deltaX;
+  frame.origin.y -= theEvent.deltaY;
+  [w setFrameOrigin:frame.origin];
+}
+@end
 
 @interface AppDelegate ()
 @property (nonatomic, readonly) BOOL canMakeTextLarger;
@@ -63,6 +78,7 @@ static void NetReachCallback(SCNetworkReachabilityRef target,
 @implementation AppDelegate {
   NSWindow*            _window;
   WebView*             _webView;
+  WebViewZoomController* _webViewZoomController;
   WebView*             _dummyExternalWebView;
   NSView*              _titlebarView; // NSTitlebarView
   NSString*            _lastNotificationCount;
@@ -71,6 +87,7 @@ static void NetReachCallback(SCNetworkReachabilityRef target,
   NSTimer*             _reloadWhenIdleTimer;
   NSDate*              _lastReloadDate;
   SCNetworkReachabilityRef _netReachRef;
+  DraggableView*       _draggableView;
   BOOL                 _isOnline;
   BOOL                 _needsReload;
   BOOL                 _webAppIsFunctional;
@@ -79,6 +96,10 @@ static void NetReachCallback(SCNetworkReachabilityRef target,
 - (void)applicationDidFinishLaunching:(NSNotification*)notification {
   // Register ourselves as the default-user-notification center delegate
   [NSUserNotificationCenter defaultUserNotificationCenter].delegate = self;
+
+  // Register user defaults
+  auto ud = [NSUserDefaults standardUserDefaults];
+  [ud registerDefaults:@{@"WebContinuousSpellCheckingEnabled": @YES}];
 
   // Create main window
   NSUInteger windowStyle = NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask;
@@ -101,17 +122,21 @@ static void NetReachCallback(SCNetworkReachabilityRef target,
     #endif
   }
   _window.collectionBehavior = NSWindowCollectionBehaviorFullScreenPrimary;
-  if ([[NSUserDefaults standardUserDefaults] boolForKey:@"moves-with-active-space"]) {
+
+  if ([ud boolForKey:@"moves-with-active-space"]) {
     _window.collectionBehavior |= NSWindowCollectionBehaviorMoveToActiveSpace;
   }
-  _window.minSize = {605,300};
-    // note: as of 2015-08-12, 604pt is as narrow as messenger.com allows the view to be, before body starts scrolling.
+  _window.minSize = {320,300};
   _window.releasedWhenClosed = NO;
   _window.delegate = self;
   [_window center];
   _window.frameAutosaveName = @"main";
   _window.movableByWindowBackground = YES;
   _titlebarView = [_window standardWindowButton:NSWindowCloseButton].superview;
+  
+  _draggableView = [[DraggableView alloc] init];
+  _draggableView.draggingWindow = _window;
+  
   [self updateWindowTitlebar];
 
   // Web prefs
@@ -130,8 +155,13 @@ static void NetReachCallback(SCNetworkReachabilityRef target,
   wp.applicationCacheTotalQuota = 500 * 1024 * 1024;
   wp.applicationCacheDefaultOriginQuota = 500 * 1024 * 1024;
   [wp _setLocalStorageDatabasePath:[WebStorageManager _storageDirectoryPath]];
+  #if DEBUG
+  NSLog(@"[WebStorageManager _storageDirectoryPath] = '%@'", [WebStorageManager _storageDirectoryPath]);
+  #endif
+  
   ENABLE(localStorageEnabled);
   ENABLE(databasesEnabled);
+  ENABLE(webGLEnabled);
   
   // Unofficial/Private settings
   ENABLE(acceleratedCompositingEnabled);
@@ -188,11 +218,15 @@ static void NetReachCallback(SCNetworkReachabilityRef target,
   webView.customUserAgent = @"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_4) AppleWebKit/600.7.12 (KHTML, like Gecko) Version/8.0.7 Safari/600.7.12";
   #endif // 0
   webView.maintainsBackForwardList = NO;
-  webView.continuousSpellCheckingEnabled = YES;
   #if USE_BLURRY_BACKGROUND
   webView.drawsBackground = NO;
   #endif
   _webView = webView;
+
+  _webViewZoomController = [[WebViewZoomController alloc] initWithWebView:webView userDefaults:[NSUserDefaults standardUserDefaults]];
+  [_webViewZoomController restoreSavedZoomLevels];
+
+  [_window.contentView addSubview:_draggableView];
   
   // Dim effect view
   _curtainView = [[NSView alloc] initWithFrame:[_window.contentView bounds]];
@@ -323,6 +357,9 @@ static void NetReachCallback(SCNetworkReachabilityRef target,
   updateButton([_window standardWindowButton:NSWindowCloseButton]);
   updateButton([_window standardWindowButton:NSWindowMiniaturizeButton]);
   updateButton([_window standardWindowButton:NSWindowZoomButton]);
+  
+  [_draggableView setFrame:[_titlebarView convertRect:_titlebarView.bounds toView:_window.contentView]];
+  _draggableView.hidden = fullScreen;
 }
 
 
@@ -637,30 +674,20 @@ static void NetReachCallback(SCNetworkReachabilityRef target,
 
 #pragma mark - WebView proxies
 
-- (BOOL)canMakeTextLarger { return _webView.canMakeTextLarger; }
-- (IBAction)makeTextLarger:(id)sender { [_webView makeTextLarger:sender]; }
-- (BOOL)canMakeTextSmaller { return _webView.canMakeTextSmaller; }
-- (IBAction)makeTextSmaller:(id)sender { [_webView makeTextSmaller:sender]; }
-- (BOOL)canMakeTextStandardSize { return _webView.canMakeTextStandardSize; }
-- (IBAction)makeTextStandardSize:(id)sender { [_webView makeTextStandardSize:sender]; }
+// forward everything to `_webViewZoomController`
+- (BOOL) canMakeTextLarger            { return _webViewZoomController.canMakeTextLarger; }
+- (IBAction)makeTextLarger:(id)sender       { [_webViewZoomController makeTextLarger:sender]; }
+- (BOOL) canMakeTextSmaller           { return _webViewZoomController.canMakeTextSmaller; }
+- (IBAction)makeTextSmaller:(id)sender      { [_webViewZoomController makeTextSmaller:sender]; }
+- (BOOL) canMakeTextStandardSize      { return _webViewZoomController.canMakeTextStandardSize; }
+- (IBAction)makeTextStandardSize:(id)sender { [_webViewZoomController makeTextStandardSize:sender]; }
+- (BOOL) canZoomPageIn               { return [_webViewZoomController canZoomPageIn]; }
+- (IBAction)zoomPageIn:(id)sender           { [_webViewZoomController zoomPageIn:sender]; }
+- (BOOL) canZoomPageOut              { return [_webViewZoomController canZoomPageOut]; }
+- (IBAction)zoomPageOut:(id)sender          { [_webViewZoomController zoomPageOut:sender]; }
+- (BOOL) canResetPageZoom            { return [_webViewZoomController canResetPageZoom]; }
+- (IBAction)resetPageZoom:(id)sender        { [_webViewZoomController resetPageZoom:sender]; }
 
-// Warning: The following methods are internal to WebView and might change at any time
-- (IBAction)zoomPageIn:(id)sender {
-  [_webView zoomPageIn:sender];
-  // Possible alternate way, which would require some fairly advanced layout code:
-  // auto clipView = _webView.mainFrame.frameView.documentView.superview;
-  // [clipView scaleUnitSquareToSize:NSMakeSize(1.1, 1.1)];
-  // [clipView setNeedsDisplay:YES];
-}
-- (IBAction)zoomPageOut:(id)sender { [_webView zoomPageOut:sender]; }
-- (BOOL)canZoomPageIn { return [_webView canZoomPageIn]; }
-- (IBAction)resetPageZoom:(id)sender {
-  [_webView resetPageZoom:sender];
-  // We also reset text size
-  [_webView makeTextStandardSize:sender];
-}
-- (BOOL)canZoomPageOut { return [_webView canZoomPageOut]; }
-- (BOOL)canResetPageZoom { return [_webView canResetPageZoom] || [self canMakeTextStandardSize]; }
 
 #pragma mark - NSWindowDelegate
 
@@ -668,11 +695,17 @@ static void NetReachCallback(SCNetworkReachabilityRef target,
 - (void)windowDidBecomeKey:(NSNotification*)notification {
   //NSLog(@"%@%@%@", self, NSStringFromSelector(_cmd), notification);
   // Give focus to the composer
-  [self evaluateJavaScript:@"(typeof MacMessenger != 'undefined') && MacMessenger.focusComposer()"];
+  [self evaluateJavaScript:@"try { (typeof MacMessenger != 'undefined') && MacMessenger.focusComposer(); } catch(_) {}"];
 }
 
 
 - (void)windowDidResize:(NSNotification *)notification {
+  if (_window.isVisible) {
+    [self updateWindowTitlebar];
+  }
+}
+
+- (void)windowDidExitFullScreen:(NSNotification *)notification {
   if (_window.isVisible) {
     [self updateWindowTitlebar];
   }
@@ -771,12 +804,28 @@ static void NetReachCallback(SCNetworkReachabilityRef target,
 
 
 - (NSArray*)webView:(WebView*)sender contextMenuItemsForElement:(NSDictionary *)element defaultMenuItems:(NSArray *)defaultMenuItems {
-  #if DEBUG
-  if (NSEvent.modifierFlags & NSAlternateKeyMask) {
-    return defaultMenuItems;
+  //NSLog(@"contextMenuItemsForElement: element = %@, menu items = %@, tags = %@", element, defaultMenuItems, [defaultMenuItems valueForKey:@"tag"]);
+  
+  // Filter menu items based on option key being pressed or not
+  NSMutableArray *menuItems = [NSMutableArray new];
+  for (NSMenuItem *menuItem in defaultMenuItems) {
+    if (menuItem.isSeparatorItem && !menuItems.count) {
+      // Skip separators at the very top
+      // (as an effect of filtering out other items at the top of the menu)
+      continue;
+    }
+    switch (menuItem.tag) {
+      case WebMenuItemTagReload:
+        continue;
+      case 2024: // Inspect Element
+        if (NSEvent.modifierFlags & NSAlternateKeyMask) {
+          break;
+        }
+        continue;
+    }
+    [menuItems addObject:menuItem];
   }
-  #endif
-  return nil;
+  return ([menuItems count]) ? menuItems : nil;
 }
 
 
@@ -813,22 +862,30 @@ static void NetReachCallback(SCNetworkReachabilityRef target,
   
   // Enable desktop notifications by default
   // Must be injected as localStorage access is per domain name (and so we can't access it from main.js)
+  // Note: Since OS X 10.11.3(?) localStorage persistency as implemented by this app is broken.
+  // The most important feature that use, which depends on localStorage, is desktop notifications.
+  // So when the app starts with an empty localStorage, we turn on notifications.
+  // The user can still turn off notifications in System Preferences.
+  // Eventually we will migrate to the next-gen webview WKWebView, which has stable support for
+  // local storage in apps.
   [webView.mainFrame.windowObject evaluateWebScript:@""
    "if (!localStorage.getItem('_cs_desktopNotifsEnabled')) {"
    "  var v = {__t:(new Date).getTime(),__v:true};"
    "  localStorage._cs_desktopNotifsEnabled = v;"
    "  localStorage.setItem('_cs_desktopNotifsEnabled', JSON.stringify(v));"
+   "  localStorage.setItem('CacheStorageVersion', '3b');"  // until we migrate to WKWebView
    "}"
    ];
   
   // JS injection. Wait for <head> to become available and then add our <script>
   if (![[NSUserDefaults standardUserDefaults] boolForKey:@"main.js/disable"]) {
     auto bundleInfo = [NSBundle mainBundle].infoDictionary;
-    #if DEBUG
-    auto mainJSURLString = @"resource://bundle/main.js";
-    #else
-    auto mainJSURLString = [NSString stringWithFormat:@"http://fbmacmessenger.rsms.me/app/main.js?v=%@", bundleInfo[@"GitRev"]];
-    #endif
+
+    // Note: 10.11 introduces "App Transport Security" which blocks custom URL protocols from
+    // being used in web views, and also prohibits non-HTTPS from loading in HTTPS context.
+    // So, we have to inject main.js.
+    auto mainJSURLString = kMainJSDataURL;
+
     [webView.mainFrame.windowObject evaluateWebScript:
      [NSString stringWithFormat:@""
       "window.MacMessengerVersion = '%@';"
@@ -836,7 +893,6 @@ static void NetReachCallback(SCNetworkReachabilityRef target,
       "function injectMainJS() {"
       "  if (document.head || document.documentElement) {"
       "    var script = document.createElement('script');"
-      "    script.async = true;"
       "    script.src = '%@';"
       "    (document.head || document.documentElement).appendChild(script);"
       "    return true;"
@@ -961,6 +1017,7 @@ static void NetReachCallback(SCNetworkReachabilityRef target,
 
 
 #pragma mark - WebPolicyDelegate
+
 
 - (void)webView:(WebView *)sender
 decidePolicyForNavigationAction:(NSDictionary *)actionInformation

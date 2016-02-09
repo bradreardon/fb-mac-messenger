@@ -9,9 +9,8 @@
 /* Begin PBXBuildFile section */
 		07DB23D81AD9E22E00177F14 /* NSImage+RoundCorner.m in Sources */ = {isa = PBXBuildFile; fileRef = 07DB23D71AD9E22E00177F14 /* NSImage+RoundCorner.m */; };
 		22C40EB11AD5C5E100FE12C1 /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 22C40EB01AD5C5E100FE12C1 /* icon.icns */; };
+		3A0B9CD31BAB4C660067C9AB /* MainJSDataURL.m in Sources */ = {isa = PBXBuildFile; fileRef = 3A0B9CD21BAB4C660067C9AB /* MainJSDataURL.m */; };
 		3A649B7F1B31E08300428884 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A649B7E1B31E08300428884 /* SystemConfiguration.framework */; };
-		3A6757221AE0A25300BDC7C5 /* MResourceURLProtocol.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3A6757211AE0A25300BDC7C5 /* MResourceURLProtocol.mm */; };
-		3A6757241AE0A52400BDC7C5 /* main.js in Resources */ = {isa = PBXBuildFile; fileRef = 3A6757231AE0A52400BDC7C5 /* main.js */; };
 		3A713BA01AD65F6500870D2A /* MEmbeddedRes.m in Sources */ = {isa = PBXBuildFile; fileRef = 3A713B9F1AD65F6500870D2A /* MEmbeddedRes.m */; };
 		3A9A9C461AD5B407008FABE9 /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3A9A9C451AD5B407008FABE9 /* AppDelegate.mm */; };
 		3A9A9C481AD5B407008FABE9 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 3A9A9C471AD5B407008FABE9 /* main.m */; };
@@ -26,6 +25,7 @@
 		3A9A9C841AD5EA13008FABE9 /* JSObjWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 3A9A9C831AD5EA13008FABE9 /* JSObjWrapper.m */; };
 		3A9A9C861AD5EE4E008FABE9 /* JSNotifications.js.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3A9A9C851AD5EE4E008FABE9 /* JSNotifications.js.mm */; };
 		669511411B00A0E600526CFD /* MMFakeDragInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 669511401B00A0E600526CFD /* MMFakeDragInfo.m */; };
+		CB4ACC4E1BF4B91F00930C59 /* WebViewZoomController.m in Sources */ = {isa = PBXBuildFile; fileRef = CB4ACC4D1BF4B91F00930C59 /* WebViewZoomController.m */; };
 		FC67C6201AD7027700459263 /* FBMApplication.mm in Sources */ = {isa = PBXBuildFile; fileRef = FC67C61F1AD7027700459263 /* FBMApplication.mm */; };
 /* End PBXBuildFile section */
 
@@ -61,9 +61,8 @@
 		07DB23D61AD9E22E00177F14 /* NSImage+RoundCorner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSImage+RoundCorner.h"; sourceTree = "<group>"; };
 		07DB23D71AD9E22E00177F14 /* NSImage+RoundCorner.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSImage+RoundCorner.m"; sourceTree = "<group>"; };
 		22C40EB01AD5C5E100FE12C1 /* icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = icon.icns; sourceTree = "<group>"; };
+		3A0B9CD21BAB4C660067C9AB /* MainJSDataURL.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = MainJSDataURL.m; path = ../build/MainJSDataURL.m; sourceTree = "<group>"; };
 		3A649B7E1B31E08300428884 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
-		3A6757201AE0A25300BDC7C5 /* MResourceURLProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MResourceURLProtocol.h; sourceTree = "<group>"; };
-		3A6757211AE0A25300BDC7C5 /* MResourceURLProtocol.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MResourceURLProtocol.mm; sourceTree = "<group>"; };
 		3A6757231AE0A52400BDC7C5 /* main.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = main.js; path = website/app/main.js; sourceTree = SOURCE_ROOT; };
 		3A713B9E1AD65F6500870D2A /* MEmbeddedRes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MEmbeddedRes.h; sourceTree = "<group>"; };
 		3A713B9F1AD65F6500870D2A /* MEmbeddedRes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MEmbeddedRes.m; sourceTree = "<group>"; };
@@ -97,6 +96,8 @@
 		3AEEEB891ADE3B0600F3A659 /* WebPreferencesPrivate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WebPreferencesPrivate.h; sourceTree = "<group>"; };
 		6695113F1B00A0E600526CFD /* MMFakeDragInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MMFakeDragInfo.h; sourceTree = "<group>"; };
 		669511401B00A0E600526CFD /* MMFakeDragInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MMFakeDragInfo.m; sourceTree = "<group>"; };
+		CB4ACC4C1BF4B91F00930C59 /* WebViewZoomController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WebViewZoomController.h; sourceTree = "<group>"; };
+		CB4ACC4D1BF4B91F00930C59 /* WebViewZoomController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WebViewZoomController.m; sourceTree = "<group>"; };
 		FC67C61E1AD7027700459263 /* FBMApplication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FBMApplication.h; sourceTree = "<group>"; };
 		FC67C61F1AD7027700459263 /* FBMApplication.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = FBMApplication.mm; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -141,6 +142,7 @@
 				3A9A9C6C1AD5CA29008FABE9 /* xcode-config */,
 				3A9A9C401AD5B407008FABE9 /* Products */,
 			);
+			indentWidth = 2;
 			sourceTree = "<group>";
 			tabWidth = 2;
 			usesTabs = 0;
@@ -162,13 +164,14 @@
 				FC67C61F1AD7027700459263 /* FBMApplication.mm */,
 				6695113F1B00A0E600526CFD /* MMFakeDragInfo.h */,
 				669511401B00A0E600526CFD /* MMFakeDragInfo.m */,
+				CB4ACC4C1BF4B91F00930C59 /* WebViewZoomController.h */,
+				CB4ACC4D1BF4B91F00930C59 /* WebViewZoomController.m */,
 				3AEEEB891ADE3B0600F3A659 /* WebPreferencesPrivate.h */,
 				3AC5B7B41B7C357F00BCF9D0 /* WebViewPrivate.h */,
 				3AEEEB881ADE3A9800F3A659 /* WebStorageManagerPrivate.h */,
 				3A713B9E1AD65F6500870D2A /* MEmbeddedRes.h */,
 				3A713B9F1AD65F6500870D2A /* MEmbeddedRes.m */,
-				3A6757201AE0A25300BDC7C5 /* MResourceURLProtocol.h */,
-				3A6757211AE0A25300BDC7C5 /* MResourceURLProtocol.mm */,
+				3A0B9CD21BAB4C660067C9AB /* MainJSDataURL.m */,
 				3A9A9C741AD5D838008FABE9 /* JSAPI */,
 				07DB23D91AD9E23100177F14 /* Categories */,
 				3A9A9C491AD5B407008FABE9 /* Images.xcassets */,
@@ -236,6 +239,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3A9A9C5C1AD5B407008FABE9 /* Build configuration list for PBXNativeTarget "Messenger" */;
 			buildPhases = (
+				3A9C50CE1BAB49A9002DB0C1 /* Run Script (gen kMainJSDataURL) */,
 				3A9A9C3B1AD5B407008FABE9 /* Sources */,
 				3A9A9C3C1AD5B407008FABE9 /* Frameworks */,
 				3A9A9C3D1AD5B407008FABE9 /* Resources */,
@@ -292,21 +296,40 @@
 				3A9A9C4A1AD5B407008FABE9 /* Images.xcassets in Resources */,
 				3A9A9C4D1AD5B407008FABE9 /* MainMenu.xib in Resources */,
 				22C40EB11AD5C5E100FE12C1 /* icon.icns in Resources */,
-				3A6757241AE0A52400BDC7C5 /* main.js in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		3A9C50CE1BAB49A9002DB0C1 /* Run Script (gen kMainJSDataURL) */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/website/app/main.js",
+			);
+			name = "Run Script (gen kMainJSDataURL)";
+			outputPaths = (
+				"$(BUILD_ROOT)/MainJSDataURL.m",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "python > ${BUILD_ROOT}/MainJSDataURL.m << END\nimport base64\nprint \"NSString* kMainJSDataURL = @\\\"data:application/javascript;base64,\" + base64.b64encode(open(\"website/app/main.js\", \"rb\").read()) + \"\\\";\"\nEND";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		3A9A9C3B1AD5B407008FABE9 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3A0B9CD31BAB4C660067C9AB /* MainJSDataURL.m in Sources */,
 				3A9A9C481AD5B407008FABE9 /* main.m in Sources */,
 				07DB23D81AD9E22E00177F14 /* NSImage+RoundCorner.m in Sources */,
 				3A9A9C841AD5EA13008FABE9 /* JSObjWrapper.m in Sources */,
-				3A6757221AE0A25300BDC7C5 /* MResourceURLProtocol.mm in Sources */,
+				CB4ACC4E1BF4B91F00930C59 /* WebViewZoomController.m in Sources */,
 				3A9A9C781AD5D873008FABE9 /* JSClass.mm in Sources */,
 				3A9A9C461AD5B407008FABE9 /* AppDelegate.mm in Sources */,
 				FC67C6201AD7027700459263 /* FBMApplication.mm in Sources */,
